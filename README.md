@@ -4,7 +4,7 @@ The official PyTorch implementation of the paper "RecVAE: A New Variational Auto
 In order to train RecVAE on [MovieLens-20M](http://files.grouplens.org/datasets/movielens/ml-20m.zip) dataset, preprocess it using following script:
 
 ```sh
-python preprocessing.py --dataset ../ml-20m/ratings.csv --output_dir ml-20m/pro_sg/ --threshold 3.5 --heldout_users 10000
+python preprocessing.py --dataset <path_to_csv_file> --output_dir ml-20m/pro_sg/ --threshold 3.5 --heldout_users 10000
 ```
 
 You can also use another dataset, it should contain columns `userId`, `movieId` and `rating` (in arbitrary order).
