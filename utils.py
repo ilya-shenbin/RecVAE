@@ -1,3 +1,5 @@
+# based on https://github.com/dawenl/vae_cf
+
 import numpy as np
 from scipy import sparse
 import pandas as pd
@@ -40,40 +42,40 @@ def load_tr_te_data(csv_file_tr, csv_file_te, n_items, n_users, global_indexing=
     return data_tr, data_te
 
 
-def get_data(global_indexing=False, dataset='pro_sg'):
-    DATA_DIR = 'ml-20m/'
-    pro_dir = os.path.join(DATA_DIR, dataset)
-    
+def get_data(dataset, global_indexing=False):
     unique_sid = list()
-    with open(os.path.join(pro_dir, 'unique_sid.txt'), 'r') as f:
+    with open(os.path.join(dataset, 'unique_sid.txt'), 'r') as f:
         for line in f:
             unique_sid.append(line.strip())
-
+    
     unique_uid = list()
-    with open(os.path.join(pro_dir, 'unique_uid.txt'), 'r') as f:
+    with open(os.path.join(dataset, 'unique_uid.txt'), 'r') as f:
         for line in f:
             unique_uid.append(line.strip())
             
     n_items = len(unique_sid)
     n_users = len(unique_uid)
     
-    train_data = load_train_data(os.path.join(pro_dir, 'train.csv'), n_items, n_users, global_indexing=global_indexing)
+    train_data = load_train_data(os.path.join(dataset, 'train.csv'), n_items, n_users, global_indexing=global_indexing)
 
 
-    vad_data_tr, vad_data_te = load_tr_te_data(os.path.join(pro_dir, 'validation_tr.csv'),
-                                               os.path.join(pro_dir, 'validation_te.csv'),
+    vad_data_tr, vad_data_te = load_tr_te_data(os.path.join(dataset, 'validation_tr.csv'),
+                                               os.path.join(dataset, 'validation_te.csv'),
                                                n_items, n_users, 
                                                global_indexing=global_indexing)
 
-    test_data_tr, test_data_te = load_tr_te_data(os.path.join(pro_dir, 'test_tr.csv'),
-                                                 os.path.join(pro_dir, 'test_te.csv'),
+    test_data_tr, test_data_te = load_tr_te_data(os.path.join(dataset, 'test_tr.csv'),
+                                                 os.path.join(dataset, 'test_te.csv'),
                                                  n_items, n_users, 
                                                  global_indexing=global_indexing)
     
-    return train_data, vad_data_tr, vad_data_te, test_data_tr, test_data_te
+    data = train_data, vad_data_tr, vad_data_te, test_data_tr, test_data_te
+    data = (x.astype('float32') for x in data)
+    
+    return data
 
 
-def NDCG_binary_at_k_batch(X_pred, heldout_batch, k=100):
+def ndcg(X_pred, heldout_batch, k=100):
     '''
     normalized discounted cumulative gain@k for binary relevance
     ASSUMPTIONS: all the 0's in heldout_data indicate 0 relevance
@@ -96,7 +98,7 @@ def NDCG_binary_at_k_batch(X_pred, heldout_batch, k=100):
     return DCG / IDCG
 
 
-def Recall_at_k_batch(X_pred, heldout_batch, k=100):
+def recall(X_pred, heldout_batch, k=100):
     batch_users = X_pred.shape[0]
 
     idx = bn.argpartition(-X_pred, k, axis=1)
