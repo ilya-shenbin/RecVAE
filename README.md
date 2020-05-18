@@ -17,6 +17,8 @@ python run.py --dataset <dataset_dir>
 
 See `python run.py -h` for more information.
 
+Current model is slightly different from the one described in the paper, you can find original code [here](https://github.com/ilya-shenbin/RecVAE/tree/wsdm).
+
 Some sources from  [Variational autoencoders for collaborative filtering](https://github.com/dawenl/vae_cf) is partially used.
 
 If you used this code for a publication, please cite our WSDM'20 paper
