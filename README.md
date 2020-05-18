@@ -11,7 +11,7 @@ You can also use another dataset, it should contain columns `userId`, `movieId` 
 
 Finally, run all cells in `recvae.ipynb`.
 
-Some sources from  [Variational autoencoders for collaborative filtering](https://github.com/dawenl/vae_cf) is partially used. Use preprocessing script from that repository before running RecVAE notebook.
+Some sources from  [Variational autoencoders for collaborative filtering](https://github.com/dawenl/vae_cf) is partially used.
 
 If you used this code for a publication, please cite our WSDM'20 paper
 ```
