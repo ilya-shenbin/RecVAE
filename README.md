@@ -1,21 +1,15 @@
 # RecVAE
 The official PyTorch implementation of the paper "RecVAE: A New Variational Autoencoder for Top-N Recommendations with Implicit Feedback".
 
-In order to train RecVAE on MovieLens-20M dataset ([download link](http://files.grouplens.org/datasets/movielens/ml-20m.zip)), preprocess it using following script:
+In order to train RecVAE on [MovieLens-20M](http://files.grouplens.org/datasets/movielens/ml-20m.zip) dataset, preprocess it using following script:
 
 ```sh
-python preprocessing.py --dataset <path_to_csv_file> --output_dir <dataset_dir> --threshold 3.5 --heldout_users 10000
+python preprocessing.py --dataset <path_to_csv_file> --output_dir ml-20m/pro_sg/ --threshold 3.5 --heldout_users 10000
 ```
 
 You can also use another dataset, it should contain columns `userId`, `movieId` and `rating` (in arbitrary order).
 
-Then use the following command to start training:
-
-```
-python run.py --dataset <dataset_dir>
-```
-
-See `python run.py -h` for more information.
+Finally, run all cells in `recvae.ipynb`.
 
 Some sources from  [Variational autoencoders for collaborative filtering](https://github.com/dawenl/vae_cf) is partially used.
 
