@@ -76,26 +76,32 @@ def get_data(dataset, global_indexing=False):
 
 
 def ndcg(X_pred, heldout_batch, k=100):
-    '''
-    normalized discounted cumulative gain@k for binary relevance
-    ASSUMPTIONS: all the 0's in heldout_data indicate 0 relevance
-    '''
     batch_users = X_pred.shape[0]
     idx_topk_part = bn.argpartition(-X_pred, k, axis=1)
-    topk_part = X_pred[np.arange(batch_users)[:, np.newaxis],
-                       idx_topk_part[:, :k]]
+    topk_part = X_pred[np.arange(batch_users)[:, np.newaxis], idx_topk_part[:, :k]]
     idx_part = np.argsort(-topk_part, axis=1)
-    # X_pred[np.arange(batch_users)[:, np.newaxis], idx_topk] is the sorted
-    # topk predicted score
     idx_topk = idx_topk_part[np.arange(batch_users)[:, np.newaxis], idx_part]
-    # build the discount template
+
     tp = 1. / np.log2(np.arange(2, k + 2))
 
-    DCG = (heldout_batch[np.arange(batch_users)[:, np.newaxis],
-                         idx_topk].toarray() * tp).sum(axis=1)
-    IDCG = np.array([(tp[:min(n, k)]).sum()
-                     for n in heldout_batch.getnnz(axis=1)])
-    return DCG / IDCG
+    DCG = (heldout_batch[np.arange(batch_users)[:, np.newaxis], idx_topk].toarray() * tp).sum(axis=1)
+    IDCG = np.array([(tp[:min(n, k)]).sum() for n in heldout_batch.getnnz(axis=1)])
+
+    # Handle cases where IDCG is zero
+    # Because then the NDCG calculation is undefined
+    # In practice, we only see 3-10 users per batch (out of 500) so 
+    # it's not an issue. However, this should ideally be dealt with in preprocessing.
+    ndcg_scores = np.zeros(batch_users)
+    valid_users = IDCG > 0
+    ndcg_scores[valid_users] = DCG[valid_users] / IDCG[valid_users]
+
+    # Warning for users with zero IDCG
+    zero_idcg_users = np.where(IDCG == 0)[0]
+    if len(zero_idcg_users) > 0:
+        # print(f"Found {len(zero_idcg_users)} users out of {batch_users} with zero IDCG (no relevant items). Their NDCG scores are set to 0.")
+        # print(f"Example user indices with zero IDCG: {zero_idcg_users[:3]}")  # Print first 3 examples
+        pass 
+    return ndcg_scores
 
 
 def recall(X_pred, heldout_batch, k=100):
