@@ -113,7 +113,7 @@ def recall(X_pred, heldout_batch, k=100):
     return recall
 
 
-def ImplicitSLIM(W, X, λ, α, thr):
+def implicit_slim(W, X, λ, α, thr):
     A = W.copy().astype(np.float16)
     
     D = 1 / (np.array(X.sum(0)) + λ)

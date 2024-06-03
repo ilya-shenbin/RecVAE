@@ -6,7 +6,7 @@ from torch import optim
 import random
 from copy import deepcopy
 
-from utils import get_data, ndcg, recall, ImplicitSLIM
+from utils import get_data, ndcg, recall, implicit_slim
 from model import VAE
 
 import argparse
@@ -166,7 +166,7 @@ for epoch in range(args.n_epochs):
         decoder_embs = model.decoder.weight.data.T
         for embs in [encoder_embs, decoder_embs]:
             embs[:] = torch.Tensor(
-                ImplicitSLIM(embs.detach().cpu().numpy(), train_data, args.lambd, args.alpha, args.threshold)
+                implicit_slim(embs.detach().cpu().numpy(), train_data, args.lambd, args.alpha, args.threshold)
             ).to(device)
     
     if args.not_alternating:
