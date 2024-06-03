@@ -9,10 +9,15 @@ python preprocessing.py --dataset <path_to_csv_file> --output_dir <dataset_dir> 
 
 You can also use another dataset, it should contain columns `userId`, `movieId` and `rating` (in arbitrary order).
 
-Then use the following command to start training:
+Use the following command to reproduce results of RecVAE on MovieLens-20M:
 
 ```
-python run.py --dataset <dataset_dir>
+python run.py --dataset <dataset_dir> --n-epochs 50 --gamma 0.005
+```
+
+Use the following command to reproduce results of RecVAE+ImplicitSLIM ([github](https://github.com/ilya-shenbin/ImplicitSLIM), [paper](https://openreview.net/pdf?id=6vF0ZJGor4)) on MovieLens-20M:
+```
+python run.py --dataset <dataset_dir> --n-epochs 100 --latent-dim 400 --gamma 0.004 --implicitslim --step 10 --lambd 500 --alpha 1 --threshold 1000
 ```
 
 See `python run.py -h` for more information.
