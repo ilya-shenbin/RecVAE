@@ -6,7 +6,7 @@ from torch import optim
 import random
 from copy import deepcopy
 
-from utils import get_data, ndcg, recall
+from utils import get_data, ndcg, recall, ImplicitSLIM
 from model import VAE
 
 import argparse
@@ -16,12 +16,17 @@ parser.add_argument('--hidden-dim', type=int, default=600)
 parser.add_argument('--latent-dim', type=int, default=200)
 parser.add_argument('--batch-size', type=int, default=500)
 parser.add_argument('--beta', type=float, default=None)
-parser.add_argument('--gamma', type=float, default=0.005)
+parser.add_argument('--gamma', type=float, default=None)
 parser.add_argument('--lr', type=float, default=5e-4)
-parser.add_argument('--n-epochs', type=int, default=50)
+parser.add_argument('--n-epochs', type=int, default=None)
 parser.add_argument('--n-enc_epochs', type=int, default=3)
 parser.add_argument('--n-dec_epochs', type=int, default=1)
-parser.add_argument('--not-alternating', type=bool, default=False)
+parser.add_argument('--not-alternating', default=False, action="store_true")
+parser.add_argument('--implicitslim', default=False, action="store_true")
+parser.add_argument('--lambd', type=float, default=None)
+parser.add_argument('--alpha', type=float, default=None)
+parser.add_argument('--threshold', type=int, default=None)
+parser.add_argument('--step', type=int, default=None)
 args = parser.parse_args()
 
 seed = 1337
@@ -153,8 +158,17 @@ optimizer_encoder = optim.Adam(encoder_params, lr=args.lr)
 optimizer_decoder = optim.Adam(decoder_params, lr=args.lr)
 
 
+
 for epoch in range(args.n_epochs):
 
+    if args.implicitslim and epoch % args.step == args.step - 1:
+        encoder_embs = model.encoder.fc1.weight.data
+        decoder_embs = model.decoder.weight.data.T
+        for embs in [encoder_embs, decoder_embs]:
+            embs[:] = torch.Tensor(
+                ImplicitSLIM(embs.detach().cpu().numpy(), train_data, args.lambd, args.alpha, args.threshold)
+            ).to(device)
+    
     if args.not_alternating:
         run(opts=[optimizer_encoder, optimizer_decoder], n_epochs=1, dropout_rate=0.5, **learning_kwargs)
     else:

@@ -1,4 +1,5 @@
 # based on https://github.com/dawenl/vae_cf
+# ImplicitSLIM is taken from https://github.com/ilya-shenbin/ImplicitSLIM
 
 import numpy as np
 from scipy import sparse
@@ -110,3 +111,21 @@ def recall(X_pred, heldout_batch, k=100):
         np.float32)
     recall = tmp / np.minimum(k, X_true_binary.sum(axis=1))
     return recall
+
+
+def ImplicitSLIM(W, X, λ, α, thr):
+    A = W.copy().astype(np.float16)
+    
+    D = 1 / (np.array(X.sum(0)) + λ)
+    
+    ind = (np.array(X.sum(axis=0)) < thr).squeeze()
+    A[:, ind.nonzero()[0]] = 0
+    
+    M = (λ * A + A @ X.T @ X) * D * D
+    
+    AinvC = λ * M + M @ X.T @ X
+    AinvCAt = AinvC @ A.T
+
+    AC = AinvC - AinvCAt @ np.linalg.inv(np.eye(A.shape[0]) / α + AinvCAt) @ AinvC
+    
+    return α * W @ A.T @ AC
